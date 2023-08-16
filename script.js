@@ -4,6 +4,7 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 const particlesArray = [];
+const particlesCount = 100;
 
 window.addEventListener('resize', () => {
   canvas.width = window.innerWidth;
@@ -35,6 +36,12 @@ class Particle {
     this.speedY = Math.random() * 3 - 1.5;
   }
   update() {
+    if (this.x < 0 || this.x > canvas.width) {
+      this.speedX *= -1;
+    }
+    if (this.y < 0 || this.y > canvas.height) {
+      this.speedY *= -1;
+    }
     this.x += this.speedX;
     this.y += this.speedY;
   }
@@ -50,7 +57,7 @@ class Particle {
 }
 
 function init() {
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < particlesCount; i++) {
     particlesArray.push(new Particle());
   }
 }
