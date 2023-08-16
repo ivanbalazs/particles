@@ -5,6 +5,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 const particlesArray = [];
 const particlesCount = 100;
+let hue = 0;
 
 window.addEventListener('resize', () => {
   canvas.width = window.innerWidth;
@@ -54,7 +55,7 @@ class Particle {
     }
   }
   draw() {
-    ctx.fillStyle = 'green';
+    ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
@@ -74,10 +75,10 @@ function handleParticles() {
 }
 
 function animate() {
-  // ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   handleParticles();
+  hue++;
   requestAnimationFrame(animate);
 }
 
