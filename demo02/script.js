@@ -15,7 +15,7 @@ ctx.strokeStyle = 'white';
 class Particle {
   constructor(effect) {
     this.effect = effect;
-    this.radius = Math.random() * 10 + 5;
+    this.radius = Math.random() * 5 + 2;
     this.x = this.radius + Math.random() * (this.effect.width - this.radius * 2);
     this.y = this.radius + Math.random() * (this.effect.height - this.radius * 2);
     this.vx = Math.random() * 1 - 0.5;
@@ -26,7 +26,6 @@ class Particle {
     context.beginPath();
     context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     context.fill();
-    context.stroke();
   }
   update() {
     this.x += this.vx;
@@ -70,10 +69,13 @@ class Effect {
         const dy = this.particles[a].y - this.particles[b].y;
         const distance = Math.hypot(dx, dy);
         if (distance < maxDistance) {
+          const opacity = 1 - distance / maxDistance;
+          context.globalAlpha = opacity;
           context.beginPath();
           context.moveTo(this.particles[a].x, this.particles[a].y);
           context.lineTo(this.particles[b].x, this.particles[b].y);
           context.stroke();
+          context.restore();
         }
       }
     }
