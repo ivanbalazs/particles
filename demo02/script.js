@@ -7,9 +7,10 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 class Particle {
+  /** @param {Effect} effect */
   constructor(effect) {
     this.effect = effect;
-    this.radius = Math.random() * 5 + 2;
+    this.radius = Math.random() * 15 + 3;
     this.reset();
     this.vx = Math.random() * 1 - 0.5;
     this.vy = Math.random() * 1 - 0.5;
@@ -25,14 +26,34 @@ class Particle {
     context.fill();
   }
   update() {
-    this.x += this.vx;
-    if (this.x > this.effect.width - this.radius || this.x < this.radius) {
+    if (this.effect.mouse.pressed) {
+      const dx = this.x - this.effect.mouse.x;
+      const dy = this.y - this.effect.mouse.y;
+      const distance = Math.hypot(dx, dy);
+      const force = this.effect.mouse.radius / distance;
+      if (distance < this.effect.mouse.radius) {
+        const angle = Math.atan2(dy, dx);
+        this.x += Math.cos(angle) * force;
+        this.y += Math.sin(angle) * force;
+      }
+    }
+
+    if (this.x < this.radius) {
+      this.x = this.radius;
+      this.vx *= -1;
+    } else if (this.x > this.effect.width - this.radius) {
+      this.x = this.effect.width - this.radius;
       this.vx *= -1;
     }
-    this.y += this.vy;
-    if (this.y > this.effect.height - this.radius || this.y < this.radius) {
+    if (this.y < this.radius) {
+      this.y = this.radius;
+      this.vy *= -1;
+    } else if (this.y > this.effect.height - this.radius) {
+      this.y = this.effect.height - this.radius;
       this.vy *= -1;
     }
+    this.x += this.vx;
+    this.y += this.vy;
   }
 }
 
@@ -44,12 +65,33 @@ class Effect {
     this.height = this.canvas.height;
     /** @type {Particle[]} */
     this.particles = [];
-    this.numberOfParticles = 200;
+    this.numberOfParticles = 400;
     this.initContext();
     this.createParticles();
 
+    this.mouse = {
+      x: 0,
+      y: 0,
+      pressed: false,
+      radius: 450,
+    };
+
     window.addEventListener('resize', e => {
       this.resize(e.target.window.innerWidth, e.target.window.innerHeight);
+    });
+    window.addEventListener('mousemove', e => {
+      if (this.mouse.pressed) {
+        this.mouse.x = e.x;
+        this.mouse.y = e.y;
+      }
+    });
+    window.addEventListener('mousedown', e => {
+      this.mouse.pressed = true;
+      this.mouse.x = e.x;
+      this.mouse.y = e.y;
+    });
+    window.addEventListener('mouseup', e => {
+      this.mouse.pressed = false;
     });
   }
   initContext() {
