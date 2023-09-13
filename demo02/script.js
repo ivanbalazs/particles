@@ -10,10 +10,13 @@ class Particle {
   /** @param {Effect} effect */
   constructor(effect) {
     this.effect = effect;
-    this.radius = Math.random() * 15 + 3;
+    this.radius = Math.floor(Math.random() * 10 + 1);
     this.reset();
     this.vx = Math.random() * 1 - 0.5;
     this.vy = Math.random() * 1 - 0.5;
+    this.pushX = 0;
+    this.pushY = 0;
+    this.friction = 0.9;
   }
   reset() {
     this.x = this.radius + Math.random() * (this.effect.width - this.radius * 2);
@@ -33,11 +36,13 @@ class Particle {
       const force = this.effect.mouse.radius / distance;
       if (distance < this.effect.mouse.radius) {
         const angle = Math.atan2(dy, dx);
-        this.x += Math.cos(angle) * force;
-        this.y += Math.sin(angle) * force;
+        this.pushX += Math.cos(angle) * force;
+        this.pushY += Math.sin(angle) * force;
       }
     }
 
+    this.x += (this.pushX *= this.friction) + this.vx;
+    this.y += (this.pushY *= this.friction) + this.vy;
     if (this.x < this.radius) {
       this.x = this.radius;
       this.vx *= -1;
@@ -52,8 +57,6 @@ class Particle {
       this.y = this.effect.height - this.radius;
       this.vy *= -1;
     }
-    this.x += this.vx;
-    this.y += this.vy;
   }
 }
 
@@ -73,7 +76,7 @@ class Effect {
       x: 0,
       y: 0,
       pressed: false,
-      radius: 450,
+      radius: 250,
     };
 
     window.addEventListener('resize', e => {
