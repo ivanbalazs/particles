@@ -5,21 +5,18 @@ const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-gradient.addColorStop(0, 'white');
-gradient.addColorStop(0.5, 'magenta');
-gradient.addColorStop(1, 'blue');
-ctx.fillStyle = gradient;
-ctx.strokeStyle = 'white';
 
 class Particle {
   constructor(effect) {
     this.effect = effect;
     this.radius = Math.random() * 5 + 2;
-    this.x = this.radius + Math.random() * (this.effect.width - this.radius * 2);
-    this.y = this.radius + Math.random() * (this.effect.height - this.radius * 2);
+    this.reset();
     this.vx = Math.random() * 1 - 0.5;
     this.vy = Math.random() * 1 - 0.5;
+  }
+  reset() {
+    this.x = this.radius + Math.random() * (this.effect.width - this.radius * 2);
+    this.y = this.radius + Math.random() * (this.effect.height - this.radius * 2);
   }
   /** @param {CanvasRenderingContext2D} context */
   draw(context) {
@@ -40,13 +37,28 @@ class Particle {
 }
 
 class Effect {
+  /** @param {HTMLCanvasElement} canvas  */
   constructor(canvas) {
     this.canvas = canvas;
     this.width = this.canvas.width;
     this.height = this.canvas.height;
+    /** @type {Particle[]} */
     this.particles = [];
     this.numberOfParticles = 200;
+    this.initContext();
     this.createParticles();
+
+    window.addEventListener('resize', e => {
+      this.resize(e.target.window.innerWidth, e.target.window.innerHeight);
+    });
+  }
+  initContext() {
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, 'white');
+    gradient.addColorStop(0.5, 'magenta');
+    gradient.addColorStop(1, 'blue');
+    ctx.fillStyle = gradient;
+    ctx.strokeStyle = 'white';
   }
   createParticles() {
     for (let i = 0; i < this.numberOfParticles; i++) {
@@ -79,6 +91,14 @@ class Effect {
         }
       }
     }
+  }
+  resize(width, height) {
+    this.canvas.width = width;
+    this.canvas.height = height;
+    this.width = width;
+    this.height = height;
+    this.initContext();
+    this.particles.forEach(particle => particle.reset());
   }
 }
 
