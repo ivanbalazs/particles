@@ -7,16 +7,20 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 class Particle {
-  /** @param {Effect} effect */
-  constructor(effect) {
+  /**
+   * @param {Effect} effect
+   * @param {number} i
+   */
+  constructor(effect, index) {
     this.effect = effect;
+    this.index = index;
     this.radius = Math.floor(Math.random() * 10 + 1);
     this.reset();
     this.vx = Math.random() * 1 - 0.5;
     this.vy = Math.random() * 1 - 0.5;
     this.pushX = 0;
     this.pushY = 0;
-    this.friction = 0.9;
+    this.friction = 0.8;
   }
   reset() {
     this.x = this.radius + Math.random() * (this.effect.width - this.radius * 2);
@@ -24,6 +28,15 @@ class Particle {
   }
   /** @param {CanvasRenderingContext2D} context */
   draw(context) {
+    if (this.index % 5 === 0) {
+      context.save();
+      context.globalAlpha = 0.4;
+      context.beginPath();
+      context.moveTo(this.x, this.y);
+      context.lineTo(this.effect.mouse.x, this.effect.mouse.y);
+      context.stroke();
+      context.restore();
+    }
     context.beginPath();
     context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     context.fill();
@@ -76,7 +89,7 @@ class Effect {
       x: 0,
       y: 0,
       pressed: false,
-      radius: 250,
+      radius: 150,
     };
 
     window.addEventListener('resize', e => {
@@ -98,16 +111,16 @@ class Effect {
     });
   }
   initContext() {
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
     gradient.addColorStop(0, 'white');
-    gradient.addColorStop(0.5, 'magenta');
-    gradient.addColorStop(1, 'blue');
+    // gradient.addColorStop(0.5, "magenta");
+    gradient.addColorStop(1, 'gold');
     ctx.fillStyle = gradient;
-    ctx.strokeStyle = 'white';
+    ctx.strokeStyle = gradient;
   }
   createParticles() {
     for (let i = 0; i < this.numberOfParticles; i++) {
-      this.particles.push(new Particle(this));
+      this.particles.push(new Particle(this, i));
     }
   }
   handleParticles(context) {
@@ -148,7 +161,6 @@ class Effect {
 }
 
 const effect = new Effect(canvas);
-effect.handleParticles(ctx);
 
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
