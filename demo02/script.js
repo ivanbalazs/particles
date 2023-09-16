@@ -5,18 +5,18 @@ const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+let gradient;
 
 class Particle {
   /** @param {Effect} effect */
   constructor(effect) {
     this.effect = effect;
-    this.radius = Math.floor(Math.random() * 10 + 1);
+    this.radius = Math.floor(Math.random() * 8 + 8);
+    this.minRadius = this.radius;
+    this.maxRadius = this.radius * 5;
     this.reset();
-    this.vx = Math.random() * 1 - 0.5;
-    this.vy = Math.random() * 1 - 0.5;
-    this.pushX = 0;
-    this.pushY = 0;
-    this.friction = 0.9;
+    this.vx = Math.random() * 0.2 - 0.1;
+    this.vy = Math.random() * 0.2 - 0.1;
   }
   reset() {
     this.x = this.radius + Math.random() * (this.effect.width - this.radius * 2);
@@ -24,25 +24,34 @@ class Particle {
   }
   /** @param {CanvasRenderingContext2D} context */
   draw(context) {
+    // context.fillStyle = gradient;
     context.beginPath();
     context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     context.fill();
+    context.stroke();
+
+    context.save();
+    context.fillStyle = 'white';
+    context.beginPath();
+    context.arc(this.x - this.radius * 0.3, this.y - this.radius * 0.3, this.radius * 0.5, 0, Math.PI * 2);
+    context.fill();
+    context.restore();
   }
   update() {
     if (this.effect.mouse.pressed) {
       const dx = this.x - this.effect.mouse.x;
       const dy = this.y - this.effect.mouse.y;
       const distance = Math.hypot(dx, dy);
-      const force = this.effect.mouse.radius / distance;
-      if (distance < this.effect.mouse.radius) {
-        const angle = Math.atan2(dy, dx);
-        this.pushX += Math.cos(angle) * force;
-        this.pushY += Math.sin(angle) * force;
+      if (distance < this.effect.mouse.radius && this.radius < this.maxRadius) {
+        this.radius += 2;
       }
     }
+    if (this.radius > this.minRadius) {
+      this.radius -= 0.1;
+    }
 
-    this.x += (this.pushX *= this.friction) + this.vx;
-    this.y += (this.pushY *= this.friction) + this.vy;
+    this.x += this.vx;
+    this.y += this.vy;
     if (this.x < this.radius) {
       this.x = this.radius;
       this.vx *= -1;
@@ -76,7 +85,7 @@ class Effect {
       x: 0,
       y: 0,
       pressed: false,
-      radius: 250,
+      radius: 60,
     };
 
     window.addEventListener('resize', e => {
@@ -98,12 +107,11 @@ class Effect {
     });
   }
   initContext() {
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, 'white');
-    gradient.addColorStop(0.5, 'magenta');
-    gradient.addColorStop(1, 'blue');
+    gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, 'pink');
+    gradient.addColorStop(0.5, 'red');
+    gradient.addColorStop(1, 'magenta');
     ctx.fillStyle = gradient;
-    ctx.strokeStyle = 'white';
   }
   createParticles() {
     for (let i = 0; i < this.numberOfParticles; i++) {
@@ -111,7 +119,6 @@ class Effect {
     }
   }
   handleParticles(context) {
-    this.connectParticles(context);
     this.particles.forEach(particle => {
       particle.draw(context);
       particle.update();
