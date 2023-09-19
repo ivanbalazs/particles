@@ -1,11 +1,5 @@
 // https://youtu.be/5dIbK0auaB8
 
-/** @type {HTMLCanvasElement} */
-const canvas = document.getElementById('canvas1');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
 class Particle {
   /** @param {Effect} effect */
   constructor(effect) {
@@ -16,7 +10,17 @@ class Particle {
     this.vy = Math.random() * 1 - 0.5;
     this.pushX = 0;
     this.pushY = 0;
-    this.friction = 0.9;
+    this.friction = 0.6;
+    this.image = document.getElementById('stars_sprite');
+    this.spriteWidth = 50;
+    this.spriteHeight = 50;
+    this.sizeModifier = Math.random() + 0.2;
+    this.width = this.spriteWidth * this.sizeModifier;
+    this.height = this.spriteHeight * this.sizeModifier;
+    this.halfWidth = this.width * 0.5;
+    this.halfHeight = this.height * 0.5;
+    this.frameX = Math.floor(Math.random() * 3);
+    this.frameY = Math.floor(Math.random() * 3);
   }
   reset() {
     this.x = this.radius + Math.random() * (this.effect.width - this.radius * 2);
@@ -24,9 +28,17 @@ class Particle {
   }
   /** @param {CanvasRenderingContext2D} context */
   draw(context) {
-    context.beginPath();
-    context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-    context.fill();
+    context.drawImage(
+      this.image,
+      this.frameX * this.spriteWidth,
+      this.frameY * this.spriteHeight,
+      this.spriteWidth,
+      this.spriteHeight,
+      this.x - this.halfWidth,
+      this.y - this.halfHeight,
+      this.width,
+      this.height
+    );
   }
   update() {
     if (this.effect.mouse.pressed) {
@@ -61,14 +73,18 @@ class Particle {
 }
 
 class Effect {
-  /** @param {HTMLCanvasElement} canvas  */
-  constructor(canvas) {
+  /**
+   * @param {HTMLCanvasElement} canvas
+   * @param {CanvasRenderingContext2D} context
+   */
+  constructor(canvas, context) {
     this.canvas = canvas;
+    this.context = context;
     this.width = this.canvas.width;
     this.height = this.canvas.height;
     /** @type {Particle[]} */
     this.particles = [];
-    this.numberOfParticles = 400;
+    this.numberOfParticles = 300;
     this.initContext();
     this.createParticles();
 
@@ -76,7 +92,7 @@ class Effect {
       x: 0,
       y: 0,
       pressed: false,
-      radius: 250,
+      radius: 100,
     };
 
     window.addEventListener('resize', e => {
@@ -98,12 +114,7 @@ class Effect {
     });
   }
   initContext() {
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, 'white');
-    gradient.addColorStop(0.5, 'magenta');
-    gradient.addColorStop(1, 'blue');
-    ctx.fillStyle = gradient;
-    ctx.strokeStyle = 'white';
+    this.context.strokeStyle = 'white';
   }
   createParticles() {
     for (let i = 0; i < this.numberOfParticles; i++) {
@@ -147,12 +158,20 @@ class Effect {
   }
 }
 
-const effect = new Effect(canvas);
-effect.handleParticles(ctx);
+window.addEventListener('load', function () {
+  /** @type {HTMLCanvasElement} */
+  const canvas = document.getElementById('canvas1');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 
-function animate() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const effect = new Effect(canvas, ctx);
   effect.handleParticles(ctx);
-  requestAnimationFrame(animate);
-}
-animate();
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    effect.handleParticles(ctx);
+    requestAnimationFrame(animate);
+  }
+  animate();
+});
