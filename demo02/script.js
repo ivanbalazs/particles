@@ -6,6 +6,12 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+/** @type {HTMLCanvasElement} */
+const canvas2 = document.getElementById('canvas2');
+const ctx2 = canvas2.getContext('2d');
+canvas2.width = window.innerWidth;
+canvas2.height = window.innerHeight;
+
 class Particle {
   /** @param {Effect} effect */
   constructor(effect) {
@@ -17,7 +23,7 @@ class Particle {
     this.vy = Math.random() * 1 - 0.5;
     this.pushX = 0;
     this.pushY = 0;
-    this.friction = 0.9;
+    this.friction = 0.5;
   }
   reset() {
     this.x = this.radius + Math.random() * (this.effect.width - this.radius * 2);
@@ -34,11 +40,11 @@ class Particle {
       const dx = this.x - this.effect.mouse.x;
       const dy = this.y - this.effect.mouse.y;
       const distance = Math.hypot(dx, dy);
-      const force = this.effect.mouse.radius / distance;
+      const force = distance / this.effect.mouse.radius;
       if (distance < this.effect.mouse.radius) {
         const angle = Math.atan2(dy, dx);
-        this.pushX += Math.cos(angle) * force;
-        this.pushY += Math.sin(angle) * force;
+        this.pushX -= Math.cos(angle) * force;
+        this.pushY -= Math.sin(angle) * force;
       }
     }
 
@@ -69,7 +75,7 @@ class Effect {
     this.height = this.canvas.height;
     /** @type {Particle[]} */
     this.particles = [];
-    this.numberOfParticles = 400;
+    this.numberOfParticles = 600;
     this.initContext();
     this.createParticles();
 
@@ -101,14 +107,17 @@ class Effect {
   initContext() {
     ctx.fillStyle = 'white';
     ctx.strokeStyle = 'white';
+    ctx2.fillStyle = 'white';
+    ctx2.strokeStyle = 'white';
+    ctx2.lineWidth = 5;
   }
   createParticles() {
     for (let i = 0; i < this.numberOfParticles; i++) {
       this.particles.push(new Particle(this));
     }
   }
-  handleParticles(context) {
-    this.connectParticles(context);
+  handleParticles(context, context2) {
+    this.connectParticles(context2);
     this.particles.forEach(particle => {
       particle.draw(context);
       particle.update();
@@ -145,11 +154,12 @@ class Effect {
 }
 
 const effect = new Effect(canvas);
-effect.handleParticles(ctx);
+effect.handleParticles(ctx, ctx2);
 
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  effect.handleParticles(ctx);
+  ctx2.clearRect(0, 0, canvas.width, canvas.height);
+  effect.handleParticles(ctx, ctx2);
   requestAnimationFrame(animate);
 }
 animate();

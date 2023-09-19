@@ -8,10 +8,13 @@ body {
   background: black;
 }
 
-#canvas1 {
-  background: black;
+canvas {
   position: absolute;
   top: 0;
   left: 0;
+}
+
+#canvas1 {
+  background: black;
   filter: blur(7px) contrast(20);
 }
