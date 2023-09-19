@@ -10,7 +10,8 @@ class Particle {
   /** @param {Effect} effect */
   constructor(effect) {
     this.effect = effect;
-    this.radius = Math.floor(Math.random() * 10 + 1);
+    this.radius = Math.floor(Math.random() * 15 + 10);
+    this.buffer = this.radius * 4;
     this.reset();
     this.vx = Math.random() * 1 - 0.5;
     this.vy = Math.random() * 1 - 0.5;
@@ -43,18 +44,18 @@ class Particle {
 
     this.x += (this.pushX *= this.friction) + this.vx;
     this.y += (this.pushY *= this.friction) + this.vy;
-    if (this.x < this.radius) {
-      this.x = this.radius;
+    if (this.x < this.buffer) {
+      this.x = this.buffer;
       this.vx *= -1;
-    } else if (this.x > this.effect.width - this.radius) {
-      this.x = this.effect.width - this.radius;
+    } else if (this.x > this.effect.width - this.buffer) {
+      this.x = this.effect.width - this.buffer;
       this.vx *= -1;
     }
-    if (this.y < this.radius) {
-      this.y = this.radius;
+    if (this.y < this.buffer) {
+      this.y = this.buffer;
       this.vy *= -1;
-    } else if (this.y > this.effect.height - this.radius) {
-      this.y = this.effect.height - this.radius;
+    } else if (this.y > this.effect.height - this.buffer) {
+      this.y = this.effect.height - this.buffer;
       this.vy *= -1;
     }
   }
@@ -98,11 +99,7 @@ class Effect {
     });
   }
   initContext() {
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, 'white');
-    gradient.addColorStop(0.5, 'magenta');
-    gradient.addColorStop(1, 'blue');
-    ctx.fillStyle = gradient;
+    ctx.fillStyle = 'white';
     ctx.strokeStyle = 'white';
   }
   createParticles() {
